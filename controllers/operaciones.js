@@ -97,6 +97,20 @@ const getOperaciones = async (req, res) => {
             const usuario = usuariosMap[op.usuario_ref?.id] || null;
             const herramienta = herramientasMap[op.herramienta_ref?.id] || null;
 
+            const toIso = (v) => {
+                if (!v) return null;
+                try {
+                if (typeof v.toDate === "function") return v.toDate().toISOString();
+                if (v instanceof Date) return v.toISOString();
+                if (typeof v === "string") return v; // ya viene en ISO
+                if (typeof v === "object" && (v._seconds || v.seconds)) {
+                    const secs = v._seconds ?? v.seconds;
+                    return new Date(secs * 1000).toISOString();
+                }
+                return null;
+                } catch (_) { return null; }
+            };
+
             return {
                 id: op.id,
                 usuario_id: op.usuario_ref?.id || null,
@@ -105,8 +119,8 @@ const getOperaciones = async (req, res) => {
                 herramienta_id: op.herramienta_ref?.id || null,
                 herramienta_nombre: herramienta?.nombre || null,
 
-                fecha: op.fecha,
-                fecha_devolucion: op.fecha_devolucion,
+                fecha: toIso(op.fecha),
+                fecha_devolucion: toIso(op.fecha_devolucion),
                 cantidad: op.cantidad
             };
         });
